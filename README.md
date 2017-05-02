@@ -4,9 +4,9 @@
 3. 同时学习一下adb命令
 
 ### 二、app工具效果图
-![image](https://raw.githubusercontent.com/naughty-pig/ADBwifiDemo/shootcut/1.png)
+![image](https://github.com/naughty-pig/ADBwifiDemo/blob/master/shootcut/1.png)
 
-![image](https://raw.githubusercontent.com/naughty-pig/ADBwifiDemo/shootcut/2.png)
+![image](https://github.com/naughty-pig/ADBwifiDemo/blob/master/shootcut/2.png)
 
 ### 三、实现步骤:
 1. 首先获取局域网的ip地址
