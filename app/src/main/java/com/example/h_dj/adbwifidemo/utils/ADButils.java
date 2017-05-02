@@ -16,6 +16,9 @@ import java.util.Enumeration;
 
 /**
  * Created by H_DJ on 2017/5/1.
+ * <p>
+ * <p>
+ * 问题： 使用Runtime.getRuntime().exec(new String[]{"/system/xbin/su","-c","setprop service.adb.tcp.port 5555"}); 没有反应
  */
 
 public class ADButils {
@@ -79,7 +82,7 @@ public class ADButils {
     }
 
     /**
-     * 把32整型ip地址转换为四位X.X.X.X的ip
+     * 把32整型ip地址
      */
     private String getLocalIpAddress() {
         //1. 获取wifi服务
@@ -98,7 +101,7 @@ public class ADButils {
     }
 
     /**
-     * 把32位ip转化为本地ip地址
+     * 把32位ip转化为转换为四位X.X.X.X的本地ip地址
      *
      * @param ipAddress
      * @return
@@ -222,7 +225,14 @@ public class ADButils {
         if (!isConn) {
             result = "adb connect: " + getLocalIpAddress(); //获取ip地址;
             execShell(new String[]{"setprop service.adb.tcp.port 5555", "stop adbd", "start adbd"});
-            isConn = true;
+            /**
+             * 上述是自定义方法：用于往android shell中写入命令
+             * 也可以使用一下语句；但我没有执行成功
+             * Runtime.getRuntime().exec("/system/xbin/su/,"-c","setprop service.adb.tcp.port 5555");
+             *Runtime.getRuntime().exec("/system/xbin/su/,"-c","stop adbd");
+             * Runtime.getRuntime().exec("/system/xbin/su/,"-c","start adbd");
+             */
+            isConn = true; //判断adb是否已开启
         }
         LogUtil.e("return :" + result + " :isConn" + isConn);
         return result;
@@ -230,7 +240,9 @@ public class ADButils {
 
     /**
      * 在su文件中写入命令
-     * 这里一定要注意s[i]后面的“\n”是不可缺少的，由于DataOutputStream这个接口并不能直接操作底层shell，所以需要"\n"来标志一条命令的结束。
+     * 这里一定要注意s[i]后面的“\n”是不可缺少的，
+     * 由于DataOutputStream这个接口并不能直接操作底层shell，
+     * 所以需要"\n"来标志一条命令的结束。
      *
      * @param s
      */
@@ -278,12 +290,11 @@ public class ADButils {
      * 重启adb
      */
     public void restartAdb() {
-        try {
-            Runtime.getRuntime().exec(new String[]{"/system/xbin/su", "-c", "adb kill-server"});
-            Runtime.getRuntime().exec(new String[]{"/system/xbin/su", "-c", "adb start-server"});
+        Process process = execShell(new String[]{"adb kill-server", "adb start-server"}).getProcess();
+        if (process == null) {
+            Toast.makeText(mContext, "重启adb失败", Toast.LENGTH_SHORT).show();
+        } else {
             Toast.makeText(mContext, "重启adb成功", Toast.LENGTH_SHORT).show();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 
@@ -312,15 +323,11 @@ public class ADButils {
      * @param packageName
      */
     public void killApp(String packageName) {
-        try {
-            Process exec = Runtime.getRuntime().exec(new String[]{"/system/xbin/su", "-c", "am force-stop " + packageName});
-            if (exec == null) {
-                Toast.makeText(mContext, "app 关闭失败", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(mContext, "app 关闭成功", Toast.LENGTH_SHORT).show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        Process exec = execShell("am force-stop " + packageName).getProcess();
+        if (exec == null) {
+            Toast.makeText(mContext, "app 关闭失败", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(mContext, "app 关闭成功", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -357,15 +364,11 @@ public class ADButils {
      * @param packageName
      */
     public void clearAppCache(String packageName) {
-        try {
-            Process exec = Runtime.getRuntime().exec(new String[]{"/system/xbin/su", "-c", "pm clear " + packageName + " HERE"});
-            if (exec == null) {
-                Toast.makeText(mContext, "app 清楚缓存失败", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(mContext, "app 清楚缓存成功", Toast.LENGTH_SHORT).show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        Process exec = execShell("pm clear" + packageName + " HERE").getProcess();
+        if (exec == null) {
+            Toast.makeText(mContext, "app 清楚缓存失败", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(mContext, "app 清楚缓存成功", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -373,15 +376,11 @@ public class ADButils {
      * 重启手机
      */
     public void rebootPhone() {
-        try {
-            Process exec = Runtime.getRuntime().exec(new String[]{"/system/xbin/su", "-c", "reboot"});
-            if (exec == null) {
-                Toast.makeText(mContext, "重启失败", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(mContext, "重启成功", Toast.LENGTH_SHORT).show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        Process exec = execShell("reboot").getProcess();
+        if (exec == null) {
+            Toast.makeText(mContext, "重启失败", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(mContext, "重启成功", Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -390,15 +389,11 @@ public class ADButils {
      * 关闭手机
      */
     public void closePhone() {
-        try {
-            Process exec = Runtime.getRuntime().exec(new String[]{"/system/xbin/su", "-c", "reboot -p"});
-            if (exec == null) {
-                Toast.makeText(mContext, "重启失败", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(mContext, "重启成功", Toast.LENGTH_SHORT).show();
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        Process exec = execShell("reboot -p").getProcess();
+        if (exec == null) {
+            Toast.makeText(mContext, "重启失败", Toast.LENGTH_SHORT).show();
+        } else {
+            Toast.makeText(mContext, "重启成功", Toast.LENGTH_SHORT).show();
         }
     }
 

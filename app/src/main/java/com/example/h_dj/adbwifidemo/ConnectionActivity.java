@@ -41,6 +41,9 @@ public class ConnectionActivity extends AppCompatActivity {
         initData();
     }
 
+    /**
+     * 初始化数据
+     */
     private void initData() {
         if (intent != null) {
             boolean isConn = intent.getBooleanExtra("isConn", false);
